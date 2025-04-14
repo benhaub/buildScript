@@ -96,7 +96,7 @@ if __name__ == '__main__':
                     help='The directory to build the project which contains a top-level CMakeLists.txt. Defaults to current directory'
                     )
   parser.add_argument('-b', '--build-type', nargs='+', type=ascii, default='Debug',
-                    help='Build version to build. Defaults to "Debug". Choose from: "Debug", "Release"',
+                 help='Build version to build. Defaults to "Debug". Choose from: "Debug", "Release", "Sanitize"',
                     )
   parser.add_argument('-x', '--toolchain', nargs='?', type=ascii, default=None,
                     help='Use the specified toolchain file instead the system default.',
@@ -143,15 +143,13 @@ if __name__ == '__main__':
        if (args.target.strip('\'') == 'Tm4c123'):
            installProgram(systemName, 'lm4flash')
 
-    if (args.build_type[0].strip('\'').lower() == 'debug'):
-      subprocess.run(cmakeCommand)
-    elif (args.build_type[0].strip('\'').lower() == 'release'):
+    if (args.build_type[0].strip('\'').lower() == 'release'):
       cmakeCommand.append('-DRELEASE_BUILD=1')
-      subprocess.run(cmakeCommand)
-    else:
-      subprocess.run(cmakeCommand)
+    elif (args.build_type[0].strip('\'').lower() == 'sanitize'):
+       cmakeCommand.append('-DSANITIZE_BUILD=1')
 
-    subprocess.run(['ninja'])
+    subprocess.run(cmakeCommand)
+    subprocess.run(['ninja']) 
 
     chdir('..')
 
