@@ -66,7 +66,7 @@ def setupForPlatform(systemName):
 
 if __name__ == '__main__':
 
-  parser = argparse.ArgumentParser(prog='apf.py',
+  parser = argparse.ArgumentParser(prog='buildScript.py',
                                        description='Run cmake projects on a desktop',
                                        epilog='Created by Ben Haubrich April 19th, 2024')
   #This first positional argument holds one or more arguments (nargs='+') so that when new positional commands are add below
