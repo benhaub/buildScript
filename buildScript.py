@@ -170,7 +170,11 @@ if __name__ == '__main__':
          else:
             exit()
 
-      subprocess.run(['doxygen', 'Doxygen/Doxyfile'])
+     #In the Doxygen configuration file, set WARN_AS_ERROR = FAIL_ON_WARNINGS
+      result = subprocess.run(['doxygen', 'Doxygen/Doxyfile'])
+      if result.returncode != 0:
+        print("Doxygen exited with failure. Please check the output for errors.")
+        exit(result.returncode)
    
   if '\'valgrind\'' in args.command:
       if (rootPermissionRequired and getuser() != 'root'):
