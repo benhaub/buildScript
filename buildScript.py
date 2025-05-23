@@ -189,6 +189,6 @@ if __name__ == '__main__':
          else:
             exit()
 
-      subprocess.run(['valgrind', '--tool=' + args.valgrind_check.strip('\''), '--track-origins=yes', '--leak-check=full', '--read-inline-info=yes', '-s', buildDirectoryName + '/' + executableName + executableSuffix], shell=True)
+      subprocess.run(['valgrind', '--tool=' + args.valgrind_check[0].strip('\''), '--track-origins=yes', '--leak-check=full', '--read-inline-info=yes', '-s', buildDirectoryName + '/' + executableName + executableSuffix])
 
 exit(0)
