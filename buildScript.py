@@ -131,12 +131,13 @@ if __name__ == '__main__':
 
     cmakeCommand = ['cmake',
                     '-G Ninja',
-                    '-DCMAKE_C_COMPILER=' + cCompiler,
-                    '-DCMAKE_CXX_COMPILER=' + cxxCompiler,
                     '-S' + '../' + args.project_dir.strip('\'')]
     
     if (args.toolchain != None):
        cmakeCommand.append('-DCMAKE_TOOLCHAIN_FILE=' + args.toolchain.strip('\''))
+    else:
+       cmakeCommand.extend(['-DCMAKE_C_COMPILER=' + cCompiler,
+                            '-DCMAKE_CXX_COMPILER=' + cxxCompiler])
 
     if (args.target != None):
        cmakeCommand.append('-D' + args.target.strip('\'') + '=1')
