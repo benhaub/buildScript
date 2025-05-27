@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     help='Run clang-tidy with one of the supported checks. default is cppcoreguidelines-*'
                     )
   parser.add_argument('-f', '--path-to-analyze', nargs='+', type=ascii, default=None,
-                    help='Path to analyze. default is None. Path may lead to a file or a directory.'
+                    help='Path to analyze for cppcheck and clang-tidy. default is None. Path may lead to a file or a directory.'
                     )
 
   args = parser.parse_args()
@@ -202,7 +202,12 @@ if __name__ == '__main__':
          else:
             exit()
 
-      subprocess.run(['valgrind', '--tool=' + args.valgrind_check[0].strip('\''), '--track-origins=yes', '--leak-check=full', '--read-inline-info=yes', '-s', buildDirectoryName + '/' + executableName + executableSuffix])
+      subprocess.run(['valgrind',
+                      '--tool=' + args.valgrind_check[0].strip('\''),
+                      '--track-origins=yes',
+                      '--leak-check=full',
+                      '--read-inline-info=yes',
+                      '-s', buildDirectoryName + '/' + executableName + executableSuffix])
 
   if '\'clang-tidy\'' in args.command:
       result = subprocess.run(['brew', '--prefix', 'llvm'], capture_output=True)
@@ -214,11 +219,16 @@ if __name__ == '__main__':
               else:
                   exit()
 
-          subprocess.run([result.stdout.decode('utf-8').strip() + '/bin/clang-tidy', 
-                        '-p', buildDirectoryName,
-                        '-checks=' + args.clang_tidy_check.strip('\''),
-                        '-header-filter=.*',
-                        '<add-in-files-to-anaylze-here>'])
+      result = subprocess.run([result.stdout.decode('utf-8').strip() + '/bin/clang-tidy', 
+                               '-p', buildDirectoryName,
+                               '-checks=' + args.clang_tidy_check.strip('\''),
+                               '-header-filter=.*',
+                               '--warnings-as-errors=*',
+                               args.path_to_analyze[0].strip('\'')])
+
+      if result.returncode != 0:
+          print("Clang-tidy found errors. Please review the output.")
+          exit(result.returncode)
         
     if '\'cppcheck\'' in args.command:
         if which('cppcheck') == None:
@@ -229,6 +239,16 @@ if __name__ == '__main__':
             else:
                 exit()
 
-        subprocess.run(['cppcheck', '--check-level=exhaustive', args.path_to_analyze[0].strip('\'')])
+        result = subprocess.run(['cppcheck',
+                                 '--check-level=exhaustive',
+                                 '--enable=all',
+                                 '--disable=missingInclude',
+                                 '--inconclusive',
+                                 '--error-exitcode=1',
+                                 args.path_to_analyze[0].strip('\'')])
+
+        if result.returncode != 0:
+           print("Cppcheck found errors. Please review the output.")
+           exit(result.returncode)
        
 exit(0)
