@@ -142,6 +142,7 @@ if __name__ == '__main__':
 
       cmakeCommand = ['cmake',
                       '-G Ninja',
+                      '-DCMAKE_EXPORT_COMPILE_COMMANDS=1',
                       '-S' + '../' + args.project_dir.strip('\'')]
     
     if (args.toolchain != None):
