@@ -160,6 +160,8 @@ if __name__ == '__main__':
         cmakeCommand.append('-DRELEASE_BUILD=1')
     elif (args.build_type[0].strip('\'').lower() == 'sanitize'):
         cmakeCommand.append('-DSANITIZE_BUILD=1')
+    elif (args.build_type[0].strip('\'').lower() == 'debug'):
+        cmakeCommand.append('-DRELEASE_BUILD=0')
 
     subprocess.run(cmakeCommand)
     subprocess.run(['ninja']) 
