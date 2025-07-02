@@ -102,7 +102,7 @@ if __name__ == '__main__':
                     help='The directory to build the project which contains a top-level CMakeLists.txt. Defaults to current directory'
                     )
   parser.add_argument('-b', '--build-type', nargs='+', type=ascii, default='Debug',
-                    help='Build version to build. Defaults to "Debug". Choose from: "Debug", "Release", "Sanitize"',
+                    help='Build version to build. Defaults to "Debug". Choose from: "Debug", "Release", "Sanitize", "Profile"',
                     )
   parser.add_argument('-x', '--toolchain', nargs='?', type=ascii, default=None,
                     help='Use the specified toolchain file instead the system default.',
@@ -162,6 +162,8 @@ if __name__ == '__main__':
         cmakeCommand.append('-DSANITIZE_BUILD=1')
     elif (args.build_type[0].strip('\'').lower() == 'debug'):
         cmakeCommand.append('-DRELEASE_BUILD=0')
+    elif (args.build_type[0].strip('\'').lower() == 'profile'):
+        cmakeCommand.append('-DPROFILE_BUILD=1')
 
     subprocess.run(cmakeCommand)
     subprocess.run(['ninja']) 
