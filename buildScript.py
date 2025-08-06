@@ -101,7 +101,7 @@ if __name__ == '__main__':
   parser.add_argument('-d', '--project-dir', default='.',
                     help='The directory to build the project which contains a top-level CMakeLists.txt. Defaults to current directory'
                     )
-  parser.add_argument('-b', '--build-type', nargs='+', type=ascii, default='Debug',
+  parser.add_argument('-b', '--build-type', nargs='?', type=ascii, default='Debug',
                     help='Build version to build. Defaults to "Debug". Choose from: "Debug", "Release", "Sanitize", "Profile"',
                     )
   parser.add_argument('-x', '--toolchain', nargs='?', type=ascii, default=None,
@@ -110,14 +110,17 @@ if __name__ == '__main__':
   parser.add_argument('-t', '--target', nargs='?', type=ascii, default=None,
                     help='Compile for the target given by target'
                     )
-  parser.add_argument('-v', '--valgrind-check', nargs='+', type=ascii, default='memcheck',
+  parser.add_argument('-v', '--valgrind-check', nargs='?', type=ascii, default='memcheck',
                     help='Run valgrind. default is memcheck. Choose from: "memcheck", "cachegrind", "callgrind", "helgrind", "drd", "massif", "dhat"',
                     )
-  parser.add_argument('-c', '--clang-tidy-check', nargs='+', type=ascii, default='cppcoreguidelines-*',
+  parser.add_argument('-c', '--clang-tidy-check', nargs='?', type=ascii, default='cppcoreguidelines-*',
                     help='Run clang-tidy with one of the supported checks. default is cppcoreguidelines-*'
                     )
-  parser.add_argument('-f', '--path-to-analyze', nargs='+', type=ascii, default=None,
+  parser.add_argument('-f', '--path-to-analyze', nargs='?', type=ascii, default=None,
                     help='Path to analyze for cppcheck and clang-tidy. default is None. Path may lead to a file or a directory.'
+                    )
+  parser.add_argument('-s', '--sanitize-check', nargs='?', type=ascii, default='address',
+                    help='Run sanitize with one of the supported checks. default is address. Choose from: "address", "thread", "undefined"'
                     )
 
   args = parser.parse_args()
@@ -158,11 +161,20 @@ if __name__ == '__main__':
 
     if (args.build_type[0].strip('\'').lower() == 'release'):
         cmakeCommand.append('-DRELEASE_BUILD=1')
+        cmakeCommand.append('-DSANITIZE_BUILD=0')
+        cmakeCommand.append('-DPROFILE_BUILD=0')
     elif (args.build_type[0].strip('\'').lower() == 'sanitize'):
+        cmakeCommand.append('-DRELEASE_BUILD=0')
         cmakeCommand.append('-DSANITIZE_BUILD=1')
+        cmakeCommand.append('-DPROFILE_BUILD=0')
+        cmakeCommand.append('-DSANITIZE_CHECK=' + args.sanitize_check.strip('\'').lower())
     elif (args.build_type[0].strip('\'').lower() == 'debug'):
         cmakeCommand.append('-DRELEASE_BUILD=0')
+        cmakeCommand.append('-DSANITIZE_BUILD=0')
+        cmakeCommand.append('-DPROFILE_BUILD=0')
     elif (args.build_type[0].strip('\'').lower() == 'profile'):
+        cmakeCommand.append('-DRELEASE_BUILD=0')
+        cmakeCommand.append('-DSANITIZE_BUILD=0')
         cmakeCommand.append('-DPROFILE_BUILD=1')
 
     subprocess.run(cmakeCommand)
@@ -207,7 +219,7 @@ if __name__ == '__main__':
             exit()
 
       subprocess.run(['valgrind',
-                      '--tool=' + args.valgrind_check[0].strip('\''),
+                      '--tool=' + args.valgrind_check.strip('\''),
                       '--track-origins=yes',
                       '--leak-check=full',
                       '--read-inline-info=yes',
@@ -228,7 +240,7 @@ if __name__ == '__main__':
                                '-checks=' + args.clang_tidy_check.strip('\''),
                                '-header-filter=.*',
                                '--warnings-as-errors=*',
-                               args.path_to_analyze[0].strip('\'')])
+                               args.path_to_analyze.strip('\'')])
 
       if result.returncode != 0:
           print("Clang-tidy found errors. Please review the output.")
@@ -249,7 +261,7 @@ if __name__ == '__main__':
                                  '--disable=missingInclude',
                                  '--inconclusive',
                                  '--error-exitcode=1',
-                                 args.path_to_analyze[0].strip('\'')])
+                                 args.path_to_analyze.strip('\'')])
 
         if result.returncode != 0:
            print("Cppcheck found errors. Please review the output.")
