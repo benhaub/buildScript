@@ -97,7 +97,7 @@ if __name__ == '__main__':
   parser.add_argument('cppcheck', type=ascii, nargs='?', default='None',
                     help='Run cppcheck.'
                     )
-  parser.add_argument('monitor', type=ascii, nargs=2, default='None',
+  parser.add_argument('monitor', type=ascii, nargs='?', default='None',
                     help='Monitor output from the selected port. Provide the port and the baud rate as arguments.'
                     )
 
