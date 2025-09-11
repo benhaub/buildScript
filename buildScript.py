@@ -97,6 +97,9 @@ if __name__ == '__main__':
   parser.add_argument('cppcheck', type=ascii, nargs='?', default='None',
                     help='Run cppcheck.'
                     )
+  parser.add_argument('monitor', type=ascii, nargs=2, default='None',
+                    help='Monitor output from the selected port. Provide the port and the baud rate as arguments.'
+                    )
 
   parser.add_argument('-d', '--project-dir', default='.',
                     help='The directory to build the project which contains a top-level CMakeLists.txt. Defaults to current directory'
@@ -266,5 +269,15 @@ if __name__ == '__main__':
         if result.returncode != 0:
            print("Cppcheck found errors. Please review the output.")
            exit(result.returncode)
+
+   if '\'monitor\'' in args.command:
+       if (getuser() != 'root'):
+          print("Re-run with sudo to monitor a port")
+          exit()
+       else:
+          subprocess.run(['python3',
+                          '-m', 'serial.tools.miniterm',
+                          '--filter', 'direct',
+                          args.monitor[0].strip('\''), args.monitor[1].strip('\'')])
        
 exit(0)
