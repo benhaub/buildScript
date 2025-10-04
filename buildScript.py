@@ -22,6 +22,9 @@ def installationName(programName):
    if system() == 'Darwin' or system() == 'Linux':
       if 'ninja' == programName:
          return 'ninja-build'
+   if system() == 'Darwin':
+      if programName == 'clang-tidy':
+         return llvm
 
    return programName
 
@@ -229,19 +232,28 @@ if __name__ == '__main__':
                       '-s', buildDirectoryName + '/' + executableName + executableSuffix])
 
   if '\'clang-tidy\'' in args.command:
-      result = subprocess.run(['brew', '--prefix', 'llvm'], capture_output=True)
+      result = 0
+      clangTidy = ""
+
+      if systemName == 'Darwin':
+          result = subprocess.run(['brew', '--prefix', 'llvm'], capture_output=True)
+          clangTidy = result.stdout.decode('utf-8').strip() + '/bin/clang-tidy'
+      elif systemName == 'Linux':
+          result = subprocess.run(['which', 'clang-tidy'], capture_output=True)
+          clangTidy = 'clang-tidy'
+
           if 0 != result.returncode:
               print("Clang-tidy is not installed. Install it (Y/n)?")
               response = input()
               if 'Y' == response:
-                  installProgram(systemName, 'llvm')
+                  installProgram(systemName, 'clang-tidy')
               else:
                   exit()
 
-      result = subprocess.run([result.stdout.decode('utf-8').strip() + '/bin/clang-tidy', 
+      result = subprocess.run([clangTidy, 
                                '-p', buildDirectoryName,
-                               '-checks=' + args.clang_tidy_check.strip('\''),
-                               '-header-filter=.*',
+                               '-checks=' + args.clang_tidy_check.strip('\'') + '*',
+                               '-header-filter=^$',
                                '--warnings-as-errors=*',
                                args.path_to_analyze.strip('\'')])
 
