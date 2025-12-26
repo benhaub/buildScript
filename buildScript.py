@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
         if (args.target != None):
             cmakeCommand.append('-D' + args.target.strip('\'') + '=1')
-            if (args.target.strip('\'') == 'Tm4c123'):
+            if ('Tm4c' in args.target.strip('\'')):
                 installProgram(systemName, 'lm4flash')
 
         if (args.build_type[0].strip('\'').lower() == 'release'):
